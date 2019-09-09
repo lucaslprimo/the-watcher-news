@@ -1,26 +1,26 @@
 package com.lucaslprimo.thewatchernews.model
 
-import com.lucaslprimo.thewatchernews.model.api.Entities.Article
-import com.lucaslprimo.thewatchernews.model.api.Entities.Source
+import com.lucaslprimo.thewatchernews.model.api.entities.ArticleNews
+import com.lucaslprimo.thewatchernews.model.api.entities.ArticleResponse
 import com.lucaslprimo.thewatchernews.model.api.NewsApiService
 import io.reactivex.Observable
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 
 object NewsRepository {
 
-    private const val BASE_URL = "https://newsapi.org"
-    private const val API_KEY = "3cf43ec9b9124bf981e121fdcc1b0f44"
-
-    var newsApiService: NewsApiService? = null
+    private const val BASE_URL = "https://thewatchernewsapi.cognitiveservices.azure.com/bing/v7.0/"
+    private const val API_KEY = "api-key"
+    private const val API_KEY_NAME = "Ocp-Apim-Subscription-Key"
+    private var newsApiService: NewsApiService? = null
 
     init{
-        val client = getHttpLogger()
+        val client = getHttpClient()
 
         val retrofit:Retrofit = Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -30,50 +30,46 @@ object NewsRepository {
         newsApiService = retrofit.create(NewsApiService::class.java)
     }
 
-    private fun getHttpLogger() : OkHttpClient {
+    private fun getHttpClient() : OkHttpClient {
+        val clientBuilder = OkHttpClient.Builder()
+
+        clientBuilder
+            .addInterceptor { chain ->
+                val request = chain.request()
+                val newRequest = request.newBuilder().header(API_KEY_NAME, API_KEY)
+                chain.proceed(newRequest.build())
+            }
+
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = HttpLoggingInterceptor.Level.BODY
         //interceptor.level = HttpLoggingInterceptor.Level.NONE
+        clientBuilder.addInterceptor(interceptor)
 
-        return OkHttpClient.Builder().addInterceptor(interceptor).build()
+        return clientBuilder.build()
     }
 
-    fun getTopHeadlines(country:String): Observable<List<Article>?> {
+    fun getLastNews(country:String): Observable<List<ArticleNews>?> {
         return Observable.create { emitter ->
-            newsApiService?.getHeadlines(country,API_KEY)?.enqueue( object: Callback<List<Article>?> {
-                override fun onResponse(call: Call<List<Article>?>, response: Response<List<Article>?>) {
-                    response.body()?.let { emitter.onNext(it) }
+            newsApiService?.getHeadlines()?.enqueue( object: Callback<ArticleResponse?> {
+                override fun onResponse(call: Call<ArticleResponse?>, response: Response<ArticleResponse?>) {
+                    response.body()?.let { emitter.onNext(it.value) }
                 }
 
-                override fun onFailure(call: Call<List<Article>?>, t: Throwable) {
+                override fun onFailure(call: Call<ArticleResponse?>, t: Throwable) {
                     emitter.onError(t)
                 }
             })
         }
     }
 
-    fun getNewsByQuery(query:String):Observable<List<Article>?>{
+    fun getNewsByQuery(query:String):Observable<List<ArticleNews>?>{
         return Observable.create { emitter ->
-            newsApiService?.getNewsByQuery(query,API_KEY)?.enqueue( object: Callback<List<Article>?> {
-                override fun onResponse(call: Call<List<Article>?>, response: Response<List<Article>?>) {
-                    response.body()?.let { emitter.onNext(it) }
+            newsApiService?.getNewsByQuery(query)?.enqueue( object: Callback<ArticleResponse?> {
+                override fun onResponse(call: Call<ArticleResponse?>, response: Response<ArticleResponse?>) {
+                    response.body()?.let { emitter.onNext(it.value) }
                 }
 
-                override fun onFailure(call: Call<List<Article>?>, t: Throwable) {
-                    emitter.onError(t)
-                }
-            })
-        }
-    }
-
-    fun getSources(): Observable<List<Source>?> {
-        return Observable.create { emitter ->
-            newsApiService?.getSources(API_KEY)?.enqueue( object: Callback<List<Source>?> {
-                override fun onResponse(call: Call<List<Source>?>, response: Response<List<Source>?>) {
-                    response.body()?.let { emitter.onNext(it) }
-                }
-
-                override fun onFailure(call: Call<List<Source>?>, t: Throwable) {
+                override fun onFailure(call: Call<ArticleResponse?>, t: Throwable) {
                     emitter.onError(t)
                 }
             })
