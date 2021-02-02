@@ -1,9 +1,12 @@
 package com.lucaslprimo.thewatchernews
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.lucaslprimo.thewatchernews.model.NewsRepository
+import com.lucaslprimo.thewatchernews.data.NewsRepository
+import com.lucaslprimo.thewatchernews.data.objects.ArticleNews
+import com.lucaslprimo.thewatchernews.data.objects.Image
+import com.lucaslprimo.thewatchernews.data.objects.Thumbnail
 import com.lucaslprimo.thewatchernews.model.api.entities.*
-import com.lucaslprimo.thewatchernews.view.HomeViewModel
+import com.lucaslprimo.thewatchernews.presentation.HomeViewModel
 import io.reactivex.Observable
 import org.junit.Before
 import org.junit.Rule
@@ -21,7 +24,7 @@ class HomeViewModelTest{
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     @Mock
-    lateinit var newsRepository:NewsRepository
+    lateinit var newsRepository: NewsRepository
 
     lateinit var homeViewModel: HomeViewModel
 
@@ -34,8 +37,42 @@ class HomeViewModelTest{
     @Test
     fun getHeadlines_shouldBringHeadlineNews(){
         val list:MutableList<ArticleNews> = ArrayList()
-        list.add(ArticleNews("","","",true, Image(Thumbnail("",0,0)),"",ArrayList(),""))
-        list.add(ArticleNews("","","",true, Image(Thumbnail("",0,0)),"",ArrayList(),""))
+        list.add(
+            ArticleNews(
+                "",
+                "",
+                "",
+                true,
+                Image(
+                    Thumbnail(
+                        "",
+                        0,
+                        0
+                    )
+                ),
+                "",
+                ArrayList(),
+                ""
+            )
+        )
+        list.add(
+            ArticleNews(
+                "",
+                "",
+                "",
+                true,
+                Image(
+                    Thumbnail(
+                        "",
+                        0,
+                        0
+                    )
+                ),
+                "",
+                ArrayList(),
+                ""
+            )
+        )
 
         val observable = Observable.just(list.toList())
 

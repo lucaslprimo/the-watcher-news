@@ -1,4 +1,4 @@
-package com.lucaslprimo.thewatchernews.utils
+package com.lucaslprimo.thewatchernews.model.utils
 
 import android.content.Context
 import com.lucaslprimo.thewatchernews.R

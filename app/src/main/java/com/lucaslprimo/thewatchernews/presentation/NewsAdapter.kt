@@ -1,4 +1,4 @@
-package com.lucaslprimo.thewatchernews.view
+package com.lucaslprimo.thewatchernews.presentation
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -9,25 +9,30 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.lucaslprimo.thewatchernews.R
-import com.lucaslprimo.thewatchernews.model.api.entities.ArticleNews
-import com.lucaslprimo.thewatchernews.utils.TimeUtils
+import com.lucaslprimo.thewatchernews.presentation.objects.Article
 import kotlinx.android.synthetic.main.item_news.view.*
-import java.text.SimpleDateFormat
-import java.util.*
 
 
-class NewsAdapter(val items:List<ArticleNews>, val context: Context) : RecyclerView.Adapter<NewsAdapter.NewsViewHolder>(){
+class NewsAdapter(val context: Context) : RecyclerView.Adapter<NewsAdapter.NewsViewHolder>(){
+
+    var items:List<Article>? = null
+    set(value){
+        field = value
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsViewHolder {
         return NewsViewHolder(LayoutInflater.from(this.context).inflate(R.layout.item_news_small_pic, parent, false))
     }
 
     override fun getItemCount(): Int {
-        return items.size
+        if(items!=null)
+            return items!!.size
+        else return 0
     }
 
     override fun onBindViewHolder(holder: NewsViewHolder, position: Int) {
-        holder.bind(items[position])
+        items?.get(position)?.let { holder.bind(it) }
     }
 
     class NewsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -39,28 +44,27 @@ class NewsAdapter(val items:List<ArticleNews>, val context: Context) : RecyclerV
         private val txtProvider = itemView.txt_provider
 
         @SuppressLint("SimpleDateFormat")
-        fun bind(articleNews: ArticleNews){
-            txtCategory?.text = articleNews.category
-            txtDescription?.text = articleNews.description
-            txtHeadline?.text = articleNews.name
-            articleNews.provider[0].let {
-                txtProvider?.text = it.name
+        fun bind(article: Article){
+            txtCategory?.text = article.category
+            txtDescription?.text = article.excerpt
+            txtHeadline?.text = article.title
+            txtProvider?.text = article.sourceName
+
+            article.imageUrl.let {
+                Glide.with(itemView.context)
+                    .load(article.imageUrl)
+                    .into(ivImage)
             }
 
-            Glide.with(itemView.context)
-                .load(articleNews.image.thumbnail.contentUrl)
-                .into(ivImage)
-
-            val dateFormat = SimpleDateFormat(TimeUtils.DATE_API)
-            dateFormat.timeZone = TimeZone.getTimeZone("GMT")
-
-            dateFormat.parse(articleNews.datePublished).let {
-                txtDate.text = TimeUtils.getTimeAgo(it,itemView.context)
+            if(article.imageUrl == null){
+                ivImage.visibility = View.GONE;
             }
+
+            txtDate.text = article.publishedDate
 
             itemView.setOnClickListener {
                 val intent = Intent(itemView.context,WebviewActivity::class.java)
-                intent.putExtra("url",articleNews.url)
+                intent.putExtra("url",article.contentUrl)
                 itemView.context.startActivity(intent)
             }
         }

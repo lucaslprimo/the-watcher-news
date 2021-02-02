@@ -12,15 +12,21 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".view.WebviewActivity"
-            android:parentActivityName=".view.MainActivity">
-
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".view.MainActivity" />
-
+                android:value=".presentation.MainActivity" />
         </activity>
-        <activity android:name=".view.MainActivity"
+        <activity
+            android:name=".presentation.WebviewActivity"
+            android:parentActivityName=".presentation.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".presentation.MainActivity" />
+        </activity>
+        <activity
+            android:name=".presentation.MainActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
